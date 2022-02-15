@@ -60,6 +60,16 @@ router.delete('/', async (req, res) => {
 })
 
 router.put('/', async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      email: req.body.email
+    }
+  })
+
+  if (!user) {
+    return res.status(400).send({ error: 'Failed to update, user not exists' })
+  }
+
   const dob = new Date(req.body.date_of_birth)
   await prisma.user.update({
     data: {
