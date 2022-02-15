@@ -1,9 +1,25 @@
 const { PrismaClient } = require('@prisma/client')
+const { check, validationResult } = require('express-validator');
 const express = require('express')
 const router = express.Router()
 const prisma = new PrismaClient()
 
-router.post('/', async (req, res) => {
+const userValidation = [
+  check('email').isEmail().withMessage('Please enter a valid email'),
+  check('firstname').isLength({ min: 3, max: 60 }).withMessage('Firstname must be between 3 and 60 characters'),
+  check('lastname').isLength({ min: 3, max: 60 }).withMessage('Lastname must be between 3 and 60 characters'),
+  check('date_of_birth').isISO8601().withMessage('Please enter a valid date of birth yyyy-mm-dd'),
+  check('location_lat').isDecimal().withMessage('Please enter a valid latitude with type decimal'),
+  check('location_lng').isDecimal().withMessage('Please enter a valid longitude with type decimal'),
+]
+
+router.post('/', userValidation, async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
   const user = await prisma.user.findUnique({
     where: {
       email: req.body.email
@@ -59,7 +75,7 @@ router.delete('/', async (req, res) => {
   })
 })
 
-router.put('/', async (req, res) => {
+router.put('/', userValidation, async (req, res) => {
   const user = await prisma.user.findUnique({
     where: {
       email: req.body.email
