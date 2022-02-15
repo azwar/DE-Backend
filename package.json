@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "azwar akbar",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^3.9.2",
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "geo-tz": "^7.0.1"
   },
   "devDependencies": {
     "prisma": "^3.9.2"
