@@ -1,10 +1,9 @@
-const { PrismaClient } = require('@prisma/client')
 const { check, validationResult, body } = require('express-validator');
 const express = require('express');
 const { creteGreatingSchedule, removeQueue } = require('../queues/greetings.ques');
 const { redisClient } = require('../helpers/redis_helper');
+const { isUserExist, createUser, deleteUser, updateUser } = require('../services/user_services');
 const router = express.Router()
-const prisma = new PrismaClient()
 
 const userValidation = [
   check('email').isEmail().withMessage('Please enter a valid email'),
@@ -23,30 +22,17 @@ router.post('/', userValidation, async (req, res) => {
     return res.status(422).json({ errors: errors.array() });
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      email: req.body.email
-    }
-  })
+  const userExist = await isUserExist(email)
 
-  if (user) {
+  if (userExist) {
     return res.status(400).send({ error: 'User already exists' })
   }
 
-  const dob = new Date(date_of_birth)
-  await prisma.user.create({
-    data: {
-      email: email,
-      firstname: firstname,
-      lastname: lastname,
-      date_of_birth: dob,
-      location_lat: location_lat,
-      location_lng: location_lng
-    }
-  }).catch(err => {
-    console.log(err)
-    return res.status(500).send(err)
-  })
+  try {
+    await createUser(req.body)
+  } catch (error) {
+    return res.status(500).send(error)
+  }
 
   const fullName = `${firstname} ${lastname}`
   const data = {
@@ -65,24 +51,17 @@ router.post('/', userValidation, async (req, res) => {
 })
 
 router.delete('/', async (req, res) => {
-  const user = await prisma.user.findUnique({
-    where: {
-      email: req.body.email
-    }
-  })
+  const userExist = await isUserExist(req.body.email)
 
-  if (!user) {
+  if (!userExist) {
     return res.status(400).send({ error: 'Failed to delete, user not exists' })
   }
 
-  await prisma.user.delete({
-    where: {
-      email: req.body.email
-    }
-  }).catch(err => {
-    console.log(err)
-    return res.status(500).send(err)
-  })
+  try {
+    await deleteUser(req.body.email)
+  } catch (error) {
+    return res.status(500).send(error)
+  }
 
   res.send({
     message: `User with email: ${req.body.email} deleted`
@@ -91,34 +70,13 @@ router.delete('/', async (req, res) => {
 
 router.put('/', userValidation, async (req, res) => {
   const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = req.body;
-  const user = await prisma.user.findUnique({
-    where: {
-      email: req.body.email
-    }
-  })
+  const userExist = await isUserExist(email)
 
-  if (!user) {
+  if (!userExist) {
     return res.status(400).send({ error: 'Failed to update, user not exists' })
   }
 
-  const dob = new Date(req.body.date_of_birth)
-  await prisma.user.update({
-    data: {
-      email: email,
-      firstname: firstname,
-      lastname: lastname,
-      date_of_birth: dob,
-      location_lat: location_lat,
-      location_lng: location_lng
-    },
-    where: {
-      email: email
-    }
-  }).catch(err => {
-    console.log(err)
-    return res.status(500).send(err)
-  })
-
+  await updateUser(req.body)
   const fullName = `${firstname} ${lastname}`
   const data = {
     email: email,
