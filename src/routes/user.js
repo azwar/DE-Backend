@@ -48,6 +48,15 @@ router.post('/', userValidation, async (req, res) => {
     return res.status(500).send(err)
   })
 
+  const fullName = `${firstname} ${lastname}`
+  const data = {
+    email: email,
+    date_of_birth: date_of_birth,
+    message: `Hey, ${fullName} it’s your birthday`,
+    lat: location_lat,
+    lng: location_lng
+  };
+
   creteGreatingSchedule(data)
 
   res.send({
@@ -110,16 +119,17 @@ router.put('/', userValidation, async (req, res) => {
     return res.status(500).send(err)
   })
 
+  const fullName = `${firstname} ${lastname}`
   const data = {
     email: email,
     date_of_birth: date_of_birth,
-    message: `Hi ${firstname} ${lastname} happy birthday!`,
+    message: `Hey, ${fullName} it’s your birthday`,
     lat: location_lat,
     lng: location_lng
   };
   
   const jobId = redisClient.get(email)
-  removeQueue(jobId)
+  await removeQueue(jobId)
   creteGreatingSchedule(data)
 
   res.send({

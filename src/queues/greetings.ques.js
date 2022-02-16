@@ -9,14 +9,17 @@ const sendGreetingQueue = new Queue('sendGreeting', {
     host: '127.0.0.1',
     port: 6379,
     password: ''
+  },
+  limiter: {
+    max: 1000,
+    duration: 5000
   }
 });
 
-const jobProcess = (job, done) => {
+const jobProcess = async (job, done) => {
   const { message, email } = job.data;
 
-  sendGreeting(message);
-  done(null, 'success')
+  await sendGreeting(message, done);
 }
 
 const creteGreatingSchedule = async (data) => {
@@ -24,10 +27,10 @@ const creteGreatingSchedule = async (data) => {
   const userTimeZone = find(lat, lng);
   const timeToNotify = timeUntil(date_of_birth, userTimeZone[0])
 
-  console.log('Time to notify: ', timeToNotify)
+  console.log(`Time to notify: ${timeToNotify} seconds`)
 
   const option = {
-    delay: timeToNotify,
+    delay: timeToNotify * 1000,
     attempts: 5
   }
 
@@ -37,11 +40,11 @@ const creteGreatingSchedule = async (data) => {
   }
   
   const job = await sendGreetingQueue.add(jobData, option)
-  redisClient.set(email, job.id)
+  await redisClient.set(email, job.id)
 }
 
-const removeQueue = (jobId) => {
-  sendGreetingQueue.removeJobs(jobId)
+const removeQueue = async (jobId) => {
+  await sendGreetingQueue.removeJobs(jobId)
 }
 
 sendGreetingQueue.process(jobProcess);
