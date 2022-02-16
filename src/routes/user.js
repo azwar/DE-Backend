@@ -1,6 +1,8 @@
 const { PrismaClient } = require('@prisma/client')
-const { check, validationResult } = require('express-validator');
-const express = require('express')
+const { check, validationResult, body } = require('express-validator');
+const express = require('express');
+const { creteGreatingSchedule, removeQueue } = require('../queues/greetings.ques');
+const { redisClient } = require('../helpers/redis_helper');
 const router = express.Router()
 const prisma = new PrismaClient()
 
@@ -15,6 +17,7 @@ const userValidation = [
 
 router.post('/', userValidation, async (req, res) => {
   const errors = validationResult(req);
+  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = req.body;
 
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() });
@@ -30,20 +33,22 @@ router.post('/', userValidation, async (req, res) => {
     return res.status(400).send({ error: 'User already exists' })
   }
 
-  const dob = new Date(req.body.date_of_birth)
+  const dob = new Date(date_of_birth)
   await prisma.user.create({
     data: {
-      email: req.body.email,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
+      email: email,
+      firstname: firstname,
+      lastname: lastname,
       date_of_birth: dob,
-      location_lat: req.body.location_lat,
-      location_lng: req.body.location_lng
+      location_lat: location_lat,
+      location_lng: location_lng
     }
   }).catch(err => {
     console.log(err)
     return res.status(500).send(err)
   })
+
+  creteGreatingSchedule(data)
 
   res.send({
     message: `User created with email: ${req.body.email}`
@@ -76,6 +81,7 @@ router.delete('/', async (req, res) => {
 })
 
 router.put('/', userValidation, async (req, res) => {
+  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = req.body;
   const user = await prisma.user.findUnique({
     where: {
       email: req.body.email
@@ -89,20 +95,32 @@ router.put('/', userValidation, async (req, res) => {
   const dob = new Date(req.body.date_of_birth)
   await prisma.user.update({
     data: {
-      email: req.body.email,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
+      email: email,
+      firstname: firstname,
+      lastname: lastname,
       date_of_birth: dob,
-      location_lat: req.body.location_lat,
-      location_lng: req.body.location_lng
+      location_lat: location_lat,
+      location_lng: location_lng
     },
     where: {
-      email: req.body.email
+      email: email
     }
   }).catch(err => {
     console.log(err)
     return res.status(500).send(err)
   })
+
+  const data = {
+    email: email,
+    date_of_birth: date_of_birth,
+    message: `Hi ${firstname} ${lastname} happy birthday!`,
+    lat: location_lat,
+    lng: location_lng
+  };
+  
+  const jobId = redisClient.get(email)
+  removeQueue(jobId)
+  creteGreatingSchedule(data)
 
   res.send({
     message: `User updated with email: ${req.body.email}`
