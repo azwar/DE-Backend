@@ -6,17 +6,24 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "DEBUG=server:debug NODE_ENV=test mocha --require babel-core/register --reporter spec --exit   tests/ "
   },
   "author": "azwar akbar",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^3.9.2",
     "axios": "^0.26.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-node8": "^1.2.0",
     "bull": "^4.5.4",
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "config": "^3.3.7",
+    "debug": "^4.3.3",
     "express": "^4.17.2",
     "express-validator": "^6.14.0",
     "geo-tz": "^7.0.1",
+    "mocha": "^9.2.0",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.34",
     "redis": "^4.0.3"
