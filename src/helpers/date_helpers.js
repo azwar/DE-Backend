@@ -3,9 +3,6 @@ const FORMAT_AM_PM = "YYYY-MM-DD hh:mm a";
 const FORMAT_STD = "YYYY-MM-DD hh:mm";
 
 const timeUntil = (date, strTimeZone) => {
-  console.log(date)
-  console.log(strTimeZone)
-
   const specialDayTz = moment.tz(date + ' 12:22 am', FORMAT_AM_PM, strTimeZone)
   const todayUtc = moment().utc()
   const strTodayUtc = todayUtc.format(FORMAT_STD)

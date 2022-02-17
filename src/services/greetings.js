@@ -15,7 +15,7 @@ const sendGreeting = async (message, done) => {
     }
   }).catch(err => {
     console.error('Error sending message');
-    console.log(err?.response);
+    console.log(err.response);
     done(null, 'error')
   })
 }
