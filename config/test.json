@@ -1,0 +1,5 @@
+{
+  "name": "Server Test",
+  "DATABASE_URL": "mysql://root:secret@localhost:3306/digital_envision",
+  "port": 3000
+}
