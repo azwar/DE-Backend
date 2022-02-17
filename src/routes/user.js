@@ -1,8 +1,9 @@
-const { check, validationResult, body } = require('express-validator');
-const express = require('express');
-const { creteGreatingSchedule, removeQueue } = require('../queues/greetings.ques');
-const { redisClient } = require('../helpers/redis_helper');
-const { isUserExist, createUser, deleteUser, updateUser } = require('../services/user_services');
+/* eslint-disable camelcase */
+const { check, validationResult } = require('express-validator')
+const express = require('express')
+const { creteGreatingSchedule, removeQueue } = require('../queues/greetings.ques')
+const { redisClient } = require('../helpers/redis_helper')
+const { isUserExist, createUser, deleteUser, updateUser } = require('../services/user_services')
 const router = express.Router()
 
 const userValidation = [
@@ -11,15 +12,15 @@ const userValidation = [
   check('lastname').isLength({ min: 3, max: 60 }).withMessage('Lastname must be between 3 and 60 characters'),
   check('date_of_birth').isISO8601().withMessage('Please enter a valid date of birth yyyy-mm-dd'),
   check('location_lat').isDecimal().withMessage('Please enter a valid latitude with type decimal'),
-  check('location_lng').isDecimal().withMessage('Please enter a valid longitude with type decimal'),
+  check('location_lng').isDecimal().withMessage('Please enter a valid longitude with type decimal')
 ]
 
 router.post('/', userValidation, async (req, res) => {
-  const errors = validationResult(req);
-  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = req.body;
+  const errors = validationResult(req)
+  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = req.body
 
   if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
+    return res.status(422).json({ errors: errors.array() })
   }
 
   const userExist = await isUserExist(email)
@@ -41,7 +42,7 @@ router.post('/', userValidation, async (req, res) => {
     message: `Hey, ${fullName} it’s your birthday`,
     lat: location_lat,
     lng: location_lng
-  };
+  }
 
   creteGreatingSchedule(data)
 
@@ -73,7 +74,7 @@ router.delete('/', async (req, res) => {
 })
 
 router.put('/', userValidation, async (req, res) => {
-  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = req.body;
+  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = req.body
   const userExist = await isUserExist(email)
 
   if (!userExist) {
@@ -88,8 +89,8 @@ router.put('/', userValidation, async (req, res) => {
     message: `Hey, ${fullName} it’s your birthday`,
     lat: location_lat,
     lng: location_lng
-  };
-  
+  }
+
   const jobId = redisClient.get(email)
   await removeQueue(jobId)
   creteGreatingSchedule(data)

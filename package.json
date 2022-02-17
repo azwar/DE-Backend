@@ -29,6 +29,11 @@
     "redis": "^4.0.3"
   },
   "devDependencies": {
-    "prisma": "^3.9.2"
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "prisma": "^3.9.2",
+    "standard": "^16.0.4"
   }
 }

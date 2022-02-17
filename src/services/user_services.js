@@ -1,9 +1,10 @@
+/* eslint-disable camelcase */
 const { PrismaClient } = require('@prisma/client')
 
 const prisma = new PrismaClient()
 
 const createUser = async (data) => {
-  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = data;
+  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = data
 
   const dob = new Date(date_of_birth)
   await prisma.user.create({
@@ -27,7 +28,7 @@ const isUserExist = async (email) => {
     }
   })
 
-  return user ? true : false
+  return !!user
 }
 
 const deleteUser = async (email) => {
@@ -42,7 +43,7 @@ const deleteUser = async (email) => {
 }
 
 const updateUser = async (data) => {
-  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = data;
+  const { email, firstname, lastname, date_of_birth, location_lat, location_lng } = data
 
   const dob = new Date(date_of_birth)
   await prisma.user.update({
