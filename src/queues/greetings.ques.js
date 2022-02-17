@@ -27,7 +27,7 @@ const creteGreatingSchedule = async (data) => {
   const userTimeZone = find(lat, lng);
   const timeToNotify = timeUntil(date_of_birth, userTimeZone[0])
 
-  // console.log(`Time to notify: ${timeToNotify} seconds`)
+  console.log(`Time to notify: ${timeToNotify} seconds`)
 
   const option = {
     delay: timeToNotify * 1000,

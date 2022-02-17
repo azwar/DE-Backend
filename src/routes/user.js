@@ -63,6 +63,10 @@ router.delete('/', async (req, res) => {
     return res.status(500).send(error)
   }
 
+  // remove notification if user deleted
+  const jobId = redisClient.get(req.body.email)
+  await removeQueue(jobId)
+
   res.send({
     message: `User with email: ${req.body.email} deleted`
   })
